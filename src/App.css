@@ -73,3 +73,39 @@ left: 0;
     margin-top: 0;
 }
 
+.header{
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: wrap;
+    background-color: white;
+    box-shadow: 0 0 2px 2px gray;
+    padding: 1rem;
+    color: black;
+}
+.form-group{
+    margin: .5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group > label{
+    color: #777;
+    font-size: .75rem;
+    margin: .25rem;
+}
+
+.btn{
+    background-color: hsl(200, 100%, 50%);
+    color: white;
+    border-radius: 100px;
+    border: none;
+    cursor: pointer;
+    padding: 100px, 100px;
+    width: 80px;
+    height: 40px;
+}
+
+.btn:hover{
+    background-color: hsl(200, 100%, 40%);
+}

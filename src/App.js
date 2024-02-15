@@ -1,64 +1,92 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import FlashcardList from "./FlashcardList";
 import axios from "axios";
-import "./App.css"; // Make sure to import your CSS file
+import "./App.css";
 
 function App() {
-  const [Flashcards, setFlashcards] = useState(SAMPLE_FLASHCARDS);
+  const [Flashcards, setFlashcards] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const categoryEL = useRef();
+  const amountEL = useRef();
 
   useEffect(() => {
-    axios.get("https://opentdb.com/api.php?amount=10").then((res) => {
-      setFlashcards(
-        res.data.results.map((questionItem, index) => {
-          const answer = decodeString(questionItem.correct_answer);
-          const options = [
-            ...questionItem.incorrect_answers.map((a) => decodeString(a)),
-            answer,
-          ];
-          return {
-            id: `${index}-${Date.now()}`,
-            question: decodeString(questionItem.question),
-            answer: answer,
-            options: options.sort(() => Math.random() - 0.5),
-          };
-        })
-      );
+    axios.get("https://opentdb.com/api_category.php").then((res) => {
       console.log(res.data);
-    });
-  }, []);
+      setCategories(res.data.trivia_categories);
+    }, []);
+  });
+  useEffect(() => {}, []);
 
   function decodeString(str) {
     const TextArea = document.createElement("textarea");
     TextArea.innerHTML = str;
     return TextArea.value;
   }
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    axios
+      .get("https://opentdb.com/api.php", {
+        params: {
+          amount: amountEL.current.value,
+          category: categoryEL.current.value,
+        },
+      })
+      .then((res) => {
+        setFlashcards(
+          res.data.results.map((questionItem, index) => {
+            const answer = decodeString(questionItem.correct_answer);
+            const options = [
+              ...questionItem.incorrect_answers.map((a) => decodeString(a)),
+              answer,
+            ];
+            return {
+              id: `${index}-${Date.now()}`,
+              question: decodeString(questionItem.question),
+              answer: answer,
+              options: options.sort(() => Math.random() - 0.5),
+            };
+          })
+        );
+        console.log(res.data);
+      });
+  }
+
   return (
-    <div className="container">
-      <FlashcardList Flashcards={Flashcards} />
-    </div>
+    <>
+      <form className="header" onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label htmlFor="category">Category</label>
+          <select id="category" ref={categoryEL}>
+            {categories.map((categorie) => {
+              return (
+                <option value={categorie.id} key={categorie.id}>
+                  {categorie.name}
+                </option>
+              );
+            })}
+          </select>
+        </div>
+        <div className="form-group">
+          <label htmlFor="amount">Number of Questions</label>
+          <input
+            type="Number"
+            id="amount"
+            min={1}
+            step={1}
+            defaultValue={10}
+            ref={amountEL}
+          ></input>
+        </div>
+        <div className="form-group">
+          <button className="btn">Generate</button>
+        </div>
+      </form>
+      <div className="container">
+        <FlashcardList Flashcards={Flashcards} />
+      </div>
+    </>
   );
 }
-
-const SAMPLE_FLASHCARDS = [
-  {
-    id: 1,
-    question: "2+2?",
-    answer: "4",
-    options: ["2", "3", "4", "5"],
-  },
-
-  {
-    id: 2,
-    question: "3+2?",
-    answer: "5",
-    options: ["gugaa", "3", "4", "5"],
-  },
-  {
-    id: 3,
-    question: "2+2?",
-    answer: "4",
-    options: ["2", "3", "4", "5"],
-  },
-];
 
 export default App;
